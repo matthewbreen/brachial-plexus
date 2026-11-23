@@ -18,7 +18,6 @@ It runs entirely in the browser as plain static files, with no build step and no
 
 - **Explore**: 3D surfaces with MIP, linked sagittal, coronal and axial slices, a structure legend and a plexus diagram.
 - **Sagittal walk**: steps through roots → trunks → divisions → cords → branches.
-- **Slides**: the talk's slides, with their PowerPoint click builds.
 - **Quiz**: name a highlighted structure.
 
 The layout switches to a one-view-at-a-time phone version on small screens.

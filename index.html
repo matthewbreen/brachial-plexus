@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>window.BP_NOSLIDES=1;document.documentElement.classList.add('noslides');</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Brachial Plexus Neurogram Playground</title>
@@ -187,6 +188,7 @@ input[type=range]{accent-color:var(--amber);height:16px}
 
 /* ---------------- phone layout: one full-screen view at a time, picked from the bottom bar ---------------- */
 #mobNav{display:none}
+html.mob #tabs [data-m=slides],html.mob #bHelp,html.mob #helpP,html.noslides #tabs [data-m=slides],html.noslides #bHelp,html.noslides #helpP{display:none!important}
 html.mob body{overscroll-behavior:none}
 html.mob header{height:88px;gap:6px;padding:6px 8px;flex-wrap:wrap;align-content:center}
 html.mob .brand,html.mob .status,html.mob .dsk{display:none}
@@ -805,6 +807,7 @@ const HELP_SLIDES={ 0:[18,31,32,63],
 const HELP={on:false,i:0,key:-1};
 function slideSrc(n){ return `slides/s${String(n).padStart(2,'0')}.jpg`; }
 function updateHelp(){
+  if(noSlides()) HELP.on=false;
   const p=$('helpP'); $('bHelp').classList.toggle('on',HELP.on); if(!HELP.on){ p.style.display='none'; return; }
   const k=HELP_SLIDES[S.sel]?S.sel:0, list=HELP_SLIDES[k];
   if(k!==HELP.key){ HELP.key=k; HELP.i=0;
@@ -953,6 +956,7 @@ window.addEventListener('keydown',e=>{
 // ---------------------------------------------------------------- modes
 $('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
 function setMode(m){
+  if(m==='slides' && noSlides()) m='explore';
   S.mode=m; $('tabs').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
   $('drawer').classList.toggle('open', m==='slides');
   if(m==='slides' && typeof isMob==='function' && isMob()) setMV('p3d');
@@ -963,7 +967,7 @@ function setMode(m){
 }
 // slides
 // ---- PowerPoint click-builds, rebuilt from the deck: base picture + matted layers per animated shape
-let ANIMS=null; const animReady=fetch('anim/anims.json').then(r=>r.json()).then(j=>ANIMS=j).catch(()=>ANIMS={});
+let ANIMS=null; const animReady=window.BP_NOSLIDES?Promise.resolve(ANIMS={}):fetch('anim/anims.json').then(r=>r.json()).then(j=>ANIMS=j).catch(()=>ANIMS={});
 function AnimSlide(box){
   // Strict replay of the deck's click-builds: one click = one PowerPoint click group, effects run in the deck's own timing.
   const P={n:0,step:0,timers:[],els:{},onchange:null,live:[]};
@@ -1052,7 +1056,9 @@ function AnimSlide(box){
   return P;
 }
 const SPL=AnimSlide($('slideBox')), HPL=AnimSlide($('hBox'));
+function noSlides(){ return !!window.BP_NOSLIDES || document.documentElement.classList.contains('mob'); }
 function buildThumbs(){
+  if(window.BP_NOSLIDES) return;
   const t=$('thumbs'); t.innerHTML='';
   SLIDE_LIST.forEach((n,i)=>{ const im=document.createElement('img'); im.loading='lazy'; im.src=`slides/s${String(n).padStart(2,'0')}.jpg`; im.onclick=()=>setSlide(i); t.appendChild(im); });
 }
@@ -1802,7 +1808,7 @@ function setMV(id){
 function mobAfterPick(){ if(isMob() && MOB.mv==='side' && !ED.on) setMV(MOB.lastImg); }
 function mobSync(){
   const on=MOB.mq.matches; document.documentElement.classList.toggle('mob',on);
-  if(on){ if($('eRoi').classList.contains('on')) $('ePaint').click(); setMV(S.mode==='slides'?'p3d':MOB.mv); mobRail(); }
+  if(on){ if($('eRoi').classList.contains('on')) $('ePaint').click(); if(S.mode==='slides') setMode('explore'); if(HELP.on){ HELP.on=false; updateHelp(); } setMV(S.mode==='slides'?'p3d':MOB.mv); mobRail(); }
   else { document.querySelector('.rail').classList.remove('open'); requestAnimationFrame(relayout); }
 }
 function mobRail(){ if(!isMob()) return; const r=document.querySelector('.rail'); if(r.classList.contains('open')) return;
