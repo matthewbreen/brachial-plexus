@@ -1826,7 +1826,13 @@ function relayout(){ for(const k in V2) resize2D(V2[k]); const b=$('diag')&&$('d
 new ResizeObserver(()=>{ const b=$('diag').getBoundingClientRect(); if(Math.abs(b.width-_dW)>4||Math.abs(b.height-_dH)>4){_dW=b.width;_dH=b.height;buildDiagram();} }).observe($('diag'));
 (async()=>{
   try{
-    S.cases = await (await fetch('data/cases.json')).json();
+    // find the case list next to this page or in data/ (GitHub's upload button flattens folders), and point every file at wherever it is
+    let base=null;
+    for(const b of ['','data/']){ try{ const r=await fetch(b+'cases.json'); if(r.ok && !(r.headers.get('content-type')||'').includes('html')){ S.cases=await r.json(); base=b; break; } }catch(e){} }
+    if(!S.cases) throw new Error('cases.json was not found next to index.html. Upload every file from the zip into the same folder as index.html');
+    const fix=o=>{ if(Array.isArray(o)) return o.map(fix); if(o&&typeof o==='object'){ for(const k in o) o[k]=fix(o[k]); return o; }
+      return (typeof o==='string'&&/^data\/.+\.png$/.test(o)) ? base+o.slice(5) : o; };
+    fix(S.cases);
     $('caseSel').innerHTML = S.cases.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
     $('caseSel').onchange=e=>loadCase(e.target.value);
     buildThumbs(); relayout();

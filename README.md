@@ -24,7 +24,7 @@ The layout switches to a one-view-at-a-time phone version on small screens.
 
 ## Publishing on GitHub Pages
 
-1. Push this folder to the root of a repository.
+1. Put every file from this folder at the top level of the repository, next to `index.html` (the GitHub "Add file → Upload files" button is fine).
 2. Go to **Settings → Pages**.
 3. Choose **Deploy from a branch**, then select `main` and `/ (root)`.
 
